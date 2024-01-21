@@ -288,7 +288,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="Appalmir">
       <h1 className="naziv"></h1>
       <div className="agents">
         <p className="izaberiAgenta"></p>
