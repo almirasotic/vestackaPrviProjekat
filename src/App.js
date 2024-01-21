@@ -170,7 +170,7 @@ function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaused, dataAgent.agent]);
+  }, [isPaused, dataAgent]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
