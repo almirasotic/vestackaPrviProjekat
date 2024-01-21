@@ -2,7 +2,7 @@ import "./App.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { uniq } from "lodash";
-// const url = `http://127.0.0.1:8000`;
+// const url = `http://127.0.0.1:8000/`;
 const url = `https://pytnik-backend.vercel.app/`;
 
 function App() {
@@ -42,7 +42,7 @@ function App() {
     setStep(1);
     setOpisi([]);
     setIsGameOver(false);
-    setIsGameInterrupted(false);
+    // setIsGameInterrupted(false);
     setCost(0);
     setAgentPosition({ x: 0, y: 0 });
     setIsStepByStepMode(false);
@@ -55,7 +55,7 @@ function App() {
     setStep(1);
     setOpisi([]);
     setIsGameOver(false);
-    setIsGameInterrupted(false);
+    // setIsGameInterrupted(false);
     setCost(0);
     setAgentPosition({ x: 0, y: 0 });
     setIsStepByStepMode(false);
@@ -128,19 +128,21 @@ function App() {
     setIsGameOver(false);
     setIsStepByStepMode(false);
     setCurrentSimulationStep(0);
-    setIsGameInterrupted(false);
+    // setIsGameInterrupted(false);
     setStep(0);
     const data = {
       mapContent: mapContent,
       agentIndex: selectedAgent,
     };
+    console.log(data);
     try {
       const response = await axios.post(url, data);
+      console.log(response.data);
       setDataAgent(response.data.data);
       dataAgent.opisPutanja = response.data.data.opisPutanja;
-      dataAgent.agent = response.data.data.putanja;
+      dataAgent.agent = response.data.data.agent;
       dataAgent.agent.shift();
-      animateAgent(response.data.data.putanja);
+      animateAgent(response.data.data.agent);
       if (buttonRef.current) {
         buttonRef.current.blur();
       }
@@ -157,7 +159,14 @@ function App() {
           if (!prev) {
             clearTimeout(animationTimeoutRef.current);
           } else {
-            animateAgent(dataAgent.agent, currentStepRef.current - 1);
+            // Proveravamo da li je dataAgent.agent definisan i da li je niz
+            if (Array.isArray(dataAgent.agent) && dataAgent.agent.length > 0) {
+              // Oduzimamo 1 od currentStepRef.current da bi se vratili na prethodni korak
+              const previousStep = Math.max(currentStepRef.current - 1, 0);
+              animateAgent(dataAgent.agent, previousStep);
+            } else {
+              console.error("Niz 'dataAgent.agent' nije definisan ili je prazan");
+            }
           }
           return !prev;
         });
@@ -168,7 +177,8 @@ function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaused, dataAgent]);
+  }, [isPaused, dataAgent.agent]);
+  
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -218,6 +228,7 @@ function App() {
     setIsAnimating(true)
     const moveAgent = (index) => {
       currentStepRef.current = index;
+      
       if (index < path.length) {
         if (path[index] < goldCoins.length) {
           const nextPosition = goldCoins[path[index]];

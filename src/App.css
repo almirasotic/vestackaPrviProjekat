@@ -1,9 +1,23 @@
+/* .Appalmir {
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+} */
 .Appalmir {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-image: url('https://cdn.openart.ai/stable_diffusion/472bf6fe54cf7c455dd95d25906acbed17faf6c1_2000x2000.webp'); /* Ubacite URL vaše slike */
+  background-size: cover; /* Slika će pokriti ceo ekran */
+  background-position: center; /* Centriranje slike */
+  background-repeat: no-repeat; /* Sprečava ponavljanje slike */
+  height: 140vh; /* Visina elementa bude jednaka visini viewporta */
+  width: 100vw; /* Širina elementa bude jednaka širini viewporta */
 }
+
 .naziv {
   font-size: 50px;
   color: rgb(60, 213, 213);
@@ -16,6 +30,8 @@
   width: 80%;
   margin-bottom: 20px;
   gap: 10px;
+  background-image: linear-gradient(to right, #76b852, #8DC26F);
+  opacity: 0.9;
 }
 .izaberiAgenta {
   display: flex;
