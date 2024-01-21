@@ -2,7 +2,8 @@ import "./App.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { uniq } from "lodash";
-const url = `http://127.0.0.1:8000/IGRA`;
+// const url = `http://127.0.0.1:8000`;
+const url = `https://pytnik-backend.vercel.app/`;
 
 function App() {
   const [selectedAgent, setSelectedAgent] = useState("0");
@@ -13,6 +14,7 @@ function App() {
   const [mapContent, setMapContent] = useState("");
   const [agentPosition, setAgentPosition] = useState({ x: 0, y: 0 });
   const [visitedCoins, setVisitedCoins] = useState([]);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [dataAgent, setDataAgent] = useState({
     agent: [],
     agentIndex1: "",
@@ -44,6 +46,7 @@ function App() {
     setCost(0);
     setAgentPosition({ x: 0, y: 0 });
     setIsStepByStepMode(false);
+    if (isAnimating) return;
   }
 
   const handleMapChange = (event) => {
@@ -95,6 +98,7 @@ function App() {
       console.log("zavrsena igra");
       completeGame();
       setIsGameInterrupted(false);
+      setIsAnimating(false);
     }
   }, [isGameInterrupted]);
 
@@ -134,9 +138,9 @@ function App() {
       const response = await axios.post(url, data);
       setDataAgent(response.data.data);
       dataAgent.opisPutanja = response.data.data.opisPutanja;
-      dataAgent.agent = response.data.data.agent;
+      dataAgent.agent = response.data.data.putanja;
       dataAgent.agent.shift();
-      animateAgent(response.data.data.agent);
+      animateAgent(response.data.data.putanja);
       if (buttonRef.current) {
         buttonRef.current.blur();
       }
@@ -211,6 +215,7 @@ function App() {
     }
   }, [isStepByStepMode, currentSimulationStep, dataAgent]);
   const animateAgent = (path, startStep = 0) => {
+    setIsAnimating(true)
     const moveAgent = (index) => {
       currentStepRef.current = index;
       if (index < path.length) {
@@ -255,6 +260,7 @@ function App() {
       }
       if (index === path.length) {
         setIsGameOver(true);
+        setIsAnimating(false);
       }
     };
     moveAgent(startStep);
@@ -289,33 +295,38 @@ function App() {
         <div
           className={selectedAgent === "0" ? "selected-agent" : "agent"}
           onClick={() => changeAgent("0", "Akii.png")}
+          style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
         >
           <img src="Akii.png" alt="" />
           <h3>Aki</h3>
         </div>
         <div
           className={selectedAgent === "1" ? "selected-agent" : "agent"}
-          onClick={() => changeAgent("1", "Jocke.png")}
+          onClick={() => changeAgent("1", "Jockee.png")}
+          style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
         >
-          <img src="Jocke.png" alt="" />
+          <img src="Jockee.png" alt="" />
           <h3>Jocke</h3>
         </div>
         <div
           className={selectedAgent === "2" ? "selected-agent" : "agent"}
-          onClick={() => changeAgent("2", "Uki.png")}
+          onClick={() => changeAgent("2", "Ukii.png")}
+          style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
         >
-          <img src="Uki.png" alt="" />
+          <img src="Ukii.png" alt="" />
           <h3>Uki</h3>
         </div>
         <div
           className={selectedAgent === "3" ? "selected-agent" : "agent"}
-          onClick={() => changeAgent("3", "Micko.png")}
+          onClick={() => changeAgent("3", "Mickoo.png")}
+          style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
         >
-          <img src="Micko.png" alt="" />
+          <img src="Mickoo.png" alt="" />
           <h3>Micko</h3>
         </div>
         <div className="mapSelection">
-          <select onChange={handleMapChange}>
+          <select onChange={handleMapChange}disabled={isAnimating}
+            style={{ cursor: isAnimating ? "not-allowed" : "pointer" }} >
             <option value="map1">Mapa 1</option>
             <option value="map2">Mapa 2</option>
             <option value="map3">Mapa 3</option>
@@ -323,8 +334,9 @@ function App() {
             <option value="map4">Mapa 4</option>
           </select>
         </div>
-        <div className="dugme">
-          <button ref={buttonRef} onClick={handleSubmit}>
+        <div className="dugme" style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}>
+          <button ref={buttonRef} onClick={handleSubmit} className={isAnimating ? "no-hover" : ""}
+          disabled={isAnimating}>
             START
           </button>
         </div>
