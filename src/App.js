@@ -140,9 +140,9 @@ function App() {
       console.log(response.data);
       setDataAgent(response.data.data);
       dataAgent.opisPutanja = response.data.data.opisPutanja;
-      dataAgent.agent = response.data.data.agent;
+      dataAgent.agent = response.data.data.putanja;
       dataAgent.agent.shift();
-      animateAgent(response.data.data.agent);
+      animateAgent(response.data.data.putanja);
       if (buttonRef.current) {
         buttonRef.current.blur();
       }
