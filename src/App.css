@@ -231,3 +231,6 @@
 .paused {
   transition: none !important;
 }
+.no-hover {
+  pointer-events: none;
+}

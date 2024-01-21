@@ -1,64 +1,60 @@
-import "./App.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { uniq } from "lodash";
+import "./App.css";
 // const url = `http://127.0.0.1:8000/`;
 const url = `https://pytnik-backend.vercel.app/`;
 
 function App() {
   const [selectedAgent, setSelectedAgent] = useState("0");
   const [goldCoins, setGoldCoins] = useState([]);
-  const [agentImage, setAgentImage] = useState("Akii.png");
-  const [cost, setCost] = useState(0);
+  const [agentImage, setAgentImage] = useState("Aki.png");
   const [selectedMap, setSelectedMap] = useState("map1");
   const [mapContent, setMapContent] = useState("");
   const [agentPosition, setAgentPosition] = useState({ x: 0, y: 0 });
   const [visitedCoins, setVisitedCoins] = useState([]);
+  const [opisi, setOpisi] = useState([]);
+  const [isPaused, setIsPaused] = useState(true);
+  const [step, setStep] = useState(0);
+  const [showSteps, setShowSteps] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameInterrupted, setIsGameInterrupted] = useState(false);
+  const [isStepByStepMode, setIsStepByStepMode] = useState(false);
+  const [currentSimulationStep, setCurrentSimulationStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dataAgent, setDataAgent] = useState({
-    agent: [],
-    agentIndex1: "",
+    putanja: [],
     putanje: [],
     zlatnici: [],
     opisPutanja: [],
     zbir: "",
   });
-  const [opisi, setOpisi] = useState([]);
-  const [isPaused, setIsPaused] = useState(true);
-  const [step, setStep] = useState(1);
-  const [showSteps, setShowSteps] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [isGameInterrupted, setIsGameInterrupted] = useState(false);
   const animationTimeoutRef = useRef();
   const currentStepRef = useRef(0);
   const buttonRef = useRef(null);
-  const [isStepByStepMode, setIsStepByStepMode] = useState(false);
-  const [currentSimulationStep, setCurrentSimulationStep] = useState(0);
 
-  function changeAgent(agentIndex, agentImg) {
+  function changeAgent(agentIndex, agentImage) {
+    if (isAnimating) return;
     setSelectedAgent(agentIndex);
-    setAgentImage(agentImg);
+    setAgentImage(agentImage);
     setVisitedCoins([]);
-    setStep(1);
+    setStep(0);
     setOpisi([]);
     setIsGameOver(false);
-    // setIsGameInterrupted(false);
-    setCost(0);
-    setAgentPosition({ x: 0, y: 0 });
+    setIsPaused(true);
     setIsStepByStepMode(false);
-    if (isAnimating) return;
+    setShowSteps(false);
   }
 
-  const handleMapChange = (event) => {
-    setSelectedMap(event.target.value);
+  const handleMapChange = (e) => {
+    setSelectedMap(e.target.value);
     setVisitedCoins([]);
-    setStep(1);
+    setStep(0);
     setOpisi([]);
-    setIsGameOver(false);
-    // setIsGameInterrupted(false);
-    setCost(0);
-    setAgentPosition({ x: 0, y: 0 });
     setIsStepByStepMode(false);
+    setIsGameOver(false);
+    setIsPaused(true);
+    setShowSteps(false);
   };
 
   useEffect(() => {
@@ -76,8 +72,8 @@ function App() {
   }, [selectedMap]);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Enter") {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
         setIsGameInterrupted(true);
         if (animationTimeoutRef.current) {
           clearTimeout(animationTimeoutRef.current);
@@ -87,79 +83,29 @@ function App() {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [goldCoins]);
+  }, []);
 
   useEffect(() => {
     if (isGameInterrupted) {
-      console.log("zavrsena igra");
       completeGame();
       setIsGameInterrupted(false);
       setIsAnimating(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGameInterrupted]);
 
-  const completeGame = () => {
-    const newVisitedCoins = goldCoins.map((_, index) => true);
-    setVisitedCoins(newVisitedCoins);
-
-    if (goldCoins.length > 0) {
-      const startPosition = goldCoins[0];
-      setAgentPosition({
-        x: startPosition.x - startPosition.x,
-        y: startPosition.y - startPosition.y,
-      });
-    }
-    setStep(goldCoins.length);
-    setOpisi(dataAgent.opisPutanja);
-    setCost(dataAgent.zbir);
-    setIsGameOver(true);
-    setIsGameInterrupted(false);
-  };
-
-  const handleSubmit = async () => {
-    setOpisi([]);
-    setCost(0);
-    setIsPaused(false);
-    setVisitedCoins([]);
-    setIsGameOver(false);
-    setIsStepByStepMode(false);
-    setCurrentSimulationStep(0);
-    // setIsGameInterrupted(false);
-    setStep(0);
-    const data = {
-      mapContent: mapContent,
-      agentIndex: selectedAgent,
-    };
-    console.log(data);
-    try {
-      const response = await axios.post(url, data);
-      console.log(response.data);
-      setDataAgent(response.data.data);
-      dataAgent.opisPutanja = response.data.data.opisPutanja;
-      dataAgent.agent = response.data.data.putanja;
-      dataAgent.agent.shift();
-      animateAgent(response.data.data.putanja);
-      if (buttonRef.current) {
-        buttonRef.current.blur();
-      }
-    } catch (error) {
-      console.error("GRESKA!!!", error);
-    }
-  };
-
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      event.preventDefault();
-      if (event.key === " ") {
+    const handleKeyDown = (e) => {
+      e.preventDefault();
+      if (e.key === " ") {
         setIsPaused((prev) => {
           if (!prev) {
             clearTimeout(animationTimeoutRef.current);
           } else {
-            animateAgent(dataAgent.agent, currentStepRef.current - 1);
+            animateAgent(dataAgent.putanja, currentStepRef.current - 1);
           }
           return !prev;
         });
@@ -172,36 +118,86 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPaused, dataAgent]);
 
+  const completeGame = () => {
+    const newVisitedCoins = goldCoins.map((_, index) => true);
+    setVisitedCoins(newVisitedCoins);
+    if (goldCoins.length > 0) {
+      const startPosition = goldCoins[0];
+      setAgentPosition({
+        x: startPosition.x - startPosition.x,
+        y: startPosition.y - startPosition.y,
+      });
+    }
+    setStep(goldCoins.length);
+    setOpisi(dataAgent.opisPutanja);
+    setIsGameOver(true);
+    setIsGameInterrupted(false);
+  };
+
+  const handleSubmit = async () => {
+    setOpisi([]);
+    setIsPaused(false);
+    setVisitedCoins([]);
+    setIsGameOver(false);
+    setCurrentSimulationStep(0);
+    setStep(1);
+    const data = {
+      mapContent: mapContent,
+      agentIndex: selectedAgent,
+    };
+    console.log(data);
+    try {
+      const response = await axios.post(url, data);
+      console.log("Dobijeni podaci:", response.data);
+      setDataAgent(response.data.data);
+      dataAgent.opisPutanja = response.data.data.opisPutanja;
+      dataAgent.putanja = response.data.data.putanja;
+      dataAgent.putanja.shift();
+      animateAgent(response.data.data.putanja);
+      if (buttonRef.current) {
+        buttonRef.current.blur();
+      }
+    } catch (error) {
+      console.error("Došlo je do greške:", error);
+    }
+  };
+
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      event.preventDefault();
+    const handleKeyDown = (e) => {
+      e.preventDefault();
       if (isGameOver) {
         return;
       }
-      if (event.key === "s") {
+      if (e.key === "s") {
         setIsStepByStepMode((prev) => {
           if (prev === false) {
             clearTimeout(animationTimeoutRef.current);
             setCurrentSimulationStep(currentStepRef.current - 1);
           } else if (prev === true) {
-            animateAgent(dataAgent.agent, currentStepRef.current - 1);
+            animateAgent(dataAgent.putanja, currentStepRef.current - 1);
           }
           return !prev;
         });
         setShowSteps(!showSteps);
-      } else if (isStepByStepMode && event.key === "ArrowRight") {
+      } else if (isStepByStepMode && e.key === "ArrowRight") {
         const nextStep = Math.min(
           currentSimulationStep + 1,
-          dataAgent.agent.length - 1
+          dataAgent.putanja.length - 1
         );
-        animateAgent(dataAgent.agent, nextStep);
+        animateAgent(dataAgent.putanja, nextStep);
         setCurrentSimulationStep(nextStep);
         setStep(step + 1);
-      } else if (isStepByStepMode && event.key === "ArrowLeft") {
+        if (nextStep === dataAgent.putanja.length - 1) {
+          setIsAnimating(false);
+        }
+      } else if (isStepByStepMode && e.key === "ArrowLeft") {
         const prevStep = Math.max(currentSimulationStep - 1, 0);
-        animateAgent(dataAgent.agent, prevStep);
+        animateAgent(dataAgent.putanja, prevStep);
         setCurrentSimulationStep(prevStep);
         setStep(step - 1);
+        if (prevStep === dataAgent.putanja.length - 1) {
+          setIsAnimating(false);
+        }
       }
     };
 
@@ -209,18 +205,13 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isStepByStepMode, currentSimulationStep, dataAgent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStepByStepMode, currentSimulationStep, dataAgent.putanja]);
 
-  useEffect(() => {
-    if (isStepByStepMode) {
-      animateAgent(dataAgent.agent, currentSimulationStep);
-    }
-  }, [isStepByStepMode, currentSimulationStep, dataAgent]);
   const animateAgent = (path, startStep = 0) => {
     setIsAnimating(true);
     const moveAgent = (index) => {
       currentStepRef.current = index;
-
       if (index < path.length) {
         if (path[index] < goldCoins.length) {
           const nextPosition = goldCoins[path[index]];
@@ -233,21 +224,14 @@ function App() {
             });
             let i = index;
             const opis1 = dataAgent.opisPutanja[i];
+            setOpisi((opis) => [...opis, opis1]);
             if (!isStepByStepMode) {
               setStep(step + 1);
             }
-            setOpisi((opis) => [...opis, opis1]);
-            const delovi = opis1.split(":");
-            delovi[1] = delovi[1].trim();
-            if (!isNaN(delovi[1])) {
-              setCost((prev) => prev + parseFloat(delovi[1]));
-            }
 
             if (index === path.length - 1) {
-              // Kada agent dođe do poslednjeg zlatnika
               setIsGameOver(true);
             }
-
             currentStepRef.current = index + 1;
             if (!isStepByStepMode) {
               animationTimeoutRef.current = setTimeout(() => {
@@ -255,10 +239,10 @@ function App() {
               }, 2500);
             }
           } else {
-            console.error("Nevalidna pozicija zlatnika", nextPosition);
+            console.error("error", nextPosition);
           }
         } else {
-          console.error("Indeks je van granica niza 'goldCoins'", path[index]);
+          console.error("Index je izvan granica", path[index]);
         }
       }
       if (index === path.length) {
