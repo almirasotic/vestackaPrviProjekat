@@ -159,14 +159,7 @@ function App() {
           if (!prev) {
             clearTimeout(animationTimeoutRef.current);
           } else {
-            // Proveravamo da li je dataAgent.agent definisan i da li je niz
-            if (Array.isArray(dataAgent.agent) && dataAgent.agent.length > 0) {
-              // Oduzimamo 1 od currentStepRef.current da bi se vratili na prethodni korak
-              const previousStep = Math.max(currentStepRef.current - 1, 0);
-              animateAgent(dataAgent.agent, previousStep);
-            } else {
-              console.error("Niz 'dataAgent.agent' nije definisan ili je prazan");
-            }
+            animateAgent(dataAgent.agent, currentStepRef.current - 1);
           }
           return !prev;
         });
@@ -178,7 +171,6 @@ function App() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPaused, dataAgent.agent]);
-  
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -225,10 +217,10 @@ function App() {
     }
   }, [isStepByStepMode, currentSimulationStep, dataAgent]);
   const animateAgent = (path, startStep = 0) => {
-    setIsAnimating(true)
+    setIsAnimating(true);
     const moveAgent = (index) => {
       currentStepRef.current = index;
-      
+
       if (index < path.length) {
         if (path[index] < goldCoins.length) {
           const nextPosition = goldCoins[path[index]];
@@ -336,8 +328,11 @@ function App() {
           <h3>Micko</h3>
         </div>
         <div className="mapSelection">
-          <select onChange={handleMapChange}disabled={isAnimating}
-            style={{ cursor: isAnimating ? "not-allowed" : "pointer" }} >
+          <select
+            onChange={handleMapChange}
+            disabled={isAnimating}
+            style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
+          >
             <option value="map1">Mapa 1</option>
             <option value="map2">Mapa 2</option>
             <option value="map3">Mapa 3</option>
@@ -345,9 +340,16 @@ function App() {
             <option value="map4">Mapa 4</option>
           </select>
         </div>
-        <div className="dugme" style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}>
-          <button ref={buttonRef} onClick={handleSubmit} className={isAnimating ? "no-hover" : ""}
-          disabled={isAnimating}>
+        <div
+          className="dugme"
+          style={{ cursor: isAnimating ? "not-allowed" : "pointer" }}
+        >
+          <button
+            ref={buttonRef}
+            onClick={handleSubmit}
+            className={isAnimating ? "no-hover" : ""}
+            disabled={isAnimating}
+          >
             START
           </button>
         </div>
@@ -402,7 +404,7 @@ function App() {
           <div className="opisiPutanja">
             {uniq(opisi).map((opis, index) => (
               <div className="opis" key={index}>
-                Putanja od   {opis}
+                Putanja od {opis}
               </div>
             ))}
           </div>
