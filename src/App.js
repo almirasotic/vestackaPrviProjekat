@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { uniq } from "lodash";
 import "./App.css";
-// const url = `http://127.0.0.1:8000/`;
-const url = `https://pytnik-backend.vercel.app/`;
+const url = `http://127.0.0.1:8000/`;
+// const url = `https://pytnik-backend.vercel.app/`;
 
 function App() {
   const [selectedAgent, setSelectedAgent] = useState("0");
@@ -23,7 +23,7 @@ function App() {
   const [currentSimulationStep, setCurrentSimulationStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dataAgent, setDataAgent] = useState({
-    putanja: [],
+    agent: [],
     putanje: [],
     zlatnici: [],
     opisPutanja: [],
@@ -105,7 +105,7 @@ function App() {
           if (!prev) {
             clearTimeout(animationTimeoutRef.current);
           } else {
-            animateAgent(dataAgent.putanja, currentStepRef.current - 1);
+            animateAgent(dataAgent.agent, currentStepRef.current - 1);
           }
           return !prev;
         });
@@ -151,9 +151,9 @@ function App() {
       console.log("Dobijeni podaci:", response.data);
       setDataAgent(response.data.data);
       dataAgent.opisPutanja = response.data.data.opisPutanja;
-      dataAgent.putanja = response.data.data.putanja;
-      dataAgent.putanja.shift();
-      animateAgent(response.data.data.putanja);
+      dataAgent.agent = response.data.data.agent;
+      dataAgent.agent.shift();
+      animateAgent(response.data.data.agent);
       if (buttonRef.current) {
         buttonRef.current.blur();
       }
@@ -174,7 +174,7 @@ function App() {
             clearTimeout(animationTimeoutRef.current);
             setCurrentSimulationStep(currentStepRef.current - 1);
           } else if (prev === true) {
-            animateAgent(dataAgent.putanja, currentStepRef.current - 1);
+            animateAgent(dataAgent.agent, currentStepRef.current - 1);
           }
           return !prev;
         });
@@ -182,20 +182,20 @@ function App() {
       } else if (isStepByStepMode && e.key === "ArrowRight") {
         const nextStep = Math.min(
           currentSimulationStep + 1,
-          dataAgent.putanja.length - 1
+          dataAgent.agent.length - 1
         );
-        animateAgent(dataAgent.putanja, nextStep);
+        animateAgent(dataAgent.agent, nextStep);
         setCurrentSimulationStep(nextStep);
         setStep(step + 1);
-        if (nextStep === dataAgent.putanja.length - 1) {
+        if (nextStep === dataAgent.agent.length - 1) {
           setIsAnimating(false);
         }
       } else if (isStepByStepMode && e.key === "ArrowLeft") {
         const prevStep = Math.max(currentSimulationStep - 1, 0);
-        animateAgent(dataAgent.putanja, prevStep);
+        animateAgent(dataAgent.agent, prevStep);
         setCurrentSimulationStep(prevStep);
         setStep(step - 1);
-        if (prevStep === dataAgent.putanja.length - 1) {
+        if (prevStep === dataAgent.agent.length - 1) {
           setIsAnimating(false);
         }
       }
@@ -206,7 +206,7 @@ function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStepByStepMode, currentSimulationStep, dataAgent.putanja]);
+  }, [isStepByStepMode, currentSimulationStep, dataAgent.agent]);
 
   const animateAgent = (path, startStep = 0) => {
     setIsAnimating(true);
